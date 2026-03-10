@@ -1,8 +1,36 @@
+ # al head:
+  head: |
+    <script>
+      (function() {
+        function broadcast() {
+          var el = document.documentElement;
+          var cs = getComputedStyle(el);
+          var msg = {
+            glanceTheme: {
+              scheme: el.dataset.scheme || 'dark',
+              themeKey: el.dataset.theme || 'default',
+              bgh: cs.getPropertyValue('--bgh').trim(),
+              bgs: cs.getPropertyValue('--bgs').trim(),
+              bgl: cs.getPropertyValue('--bgl').trim(),
+              cm: cs.getPropertyValue('--cm').trim(),
+              tsm: cs.getPropertyValue('--tsm').trim(),
+              primary: cs.getPropertyValue('--color-primary').trim(),
+              positive: cs.getPropertyValue('--color-positive').trim(),
+              negative: cs.getPropertyValue('--color-negative').trim()
+            }
+          };
+          document.querySelectorAll('iframe').forEach(function(f) {
+            try { f.contentWindow.postMessage(msg, '*'); } catch(e) {}
+          });
+        }
+        new MutationObserver(broadcast).observe(document.documentElement, { attributes: true, attributeFilter: ['data-scheme', 'data-theme'] });
+        window.addEventListener('load', function() { setTimeout(broadcast, 500); });
+      })();
+    </script>
+
 # Agregá esto en tu glance.yml dentro de la sección widgets:
 
 - type: iframe
   title: Cron Jobs
-  source: http://cron-logs-widget:8082
-  # source: http://localhost:8082
-  height: 300
-  cache: 5m
+  source: http://192.168.x.xxx:8082
+  height: 300 # adjust
