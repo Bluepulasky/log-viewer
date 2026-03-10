@@ -1,0 +1,14 @@
+# Agregá este servicio a tu docker-compose.yml existente de Glance
+
+services:
+  cron-logs-widget:
+    build: .   # o usa image: si ya lo buildeaste
+    container_name: cron-logs-widget
+    restart: unless-stopped
+    volumes:
+      - /var/log/cron-jobs:/var/log/cron-jobs:ro   # read-only
+    ports:
+      - "8082:8082"
+    # Si Glance corre en una docker network, agregala acá:
+    # networks:
+    #   - glance_network

@@ -1,0 +1,8 @@
+# Agregá esto en tu glance.yml dentro de la sección widgets:
+
+- type: iframe
+  title: Cron Jobs
+  source: http://cron-logs-widget:8082
+  # source: http://localhost:8082
+  height: 300
+  cache: 5m
