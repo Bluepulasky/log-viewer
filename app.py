@@ -4,32 +4,43 @@ from flask import Flask, Response
 
 app = Flask(__name__)
 
-LOG_DIR = '/var/log/cron-jobs'
-NUM_LINES = 12
+LOG_DIRS = [
+    '/var/log/cron-jobs',
+    '/var/log/cobian-logs'
+]
+
+NUM_LINES = 6
 
 
 def read_last_lines(filepath, n=NUM_LINES):
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-            return [line.rstrip() for line in deque(f, maxlen=n)]
-    except PermissionError:
-        return ['[Permission denied]']
-    except Exception as e:
-        return [f'[Error: {e}]']
+    for enc in ["utf-8", "utf-16", "latin-1"]:
+        try:
+            with open(filepath, 'r', encoding=enc) as f:
+                return [line.rstrip() for line in deque(f, maxlen=n)]
+        except UnicodeError:
+            continue
+        except PermissionError:
+            return ['[Permission denied]']
+        except Exception as e:
+            return [f'[Error: {e}]']
 
 
 def get_results():
-    log_dir = Path(LOG_DIR)
-    if not log_dir.exists():
-        return {}
-    results = {}
-    for path in sorted(log_dir.rglob('*')):
-        if path.is_file():
-            relative = str(path.relative_to(LOG_DIR))
-            lines = read_last_lines(path)
-            if lines:
-                results[relative] = lines
-    return results
+  results = {}
+  for log_dir_str in LOG_DIRS:
+      log_dir = Path(log_dir_str)
+      if not log_dir.exists():
+          continue
+      for path in sorted(log_dir.rglob('*')):
+          if ".stfolder" in path.parts:
+              continue
+          print("Found:", path)
+          if path.is_file():
+              relative = f"{log_dir.name}/{path.relative_to(log_dir)}"
+              lines = read_last_lines(path)
+              if lines:
+                  results[relative] = lines
+  return results
 
 
 @app.route('/')
